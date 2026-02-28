@@ -1,0 +1,283 @@
+{
+  "registry_name": "skill-registry-rag-tool-catalog",
+  "version": "0.3.0",
+  "updated_at": "2026-02-28",
+  "experts": [
+    {
+      "id": "viz.matplotlib-seaborn",
+      "title": "Visualization with Matplotlib and Seaborn",
+      "domain": "visualization",
+      "instruction_file": "instructions/visualization-matplotlib-seaborn.md",
+      "description": "Publication-grade charting and statistical visualization workflows.",
+      "tags": ["matplotlib", "seaborn", "chart", "heatmap", "dashboard"],
+      "tool_hints": ["matplotlib.pyplot", "seaborn", "pandas"],
+      "examples": ["Build trend/distribution dashboard", "Export report-ready charts"],
+      "aliases": ["charting", "data-viz"],
+      "dependencies": ["matplotlib", "seaborn", "pandas"],
+      "input_contract": {
+        "required": "tabular dataframe or tidy data",
+        "optional": "style palette, chart type hints"
+      },
+      "output_artifacts": ["png_figures", "svg_figures", "figure_manifest"],
+      "quality_checks": ["axis_labels_present", "units_present", "legend_consistency"],
+      "constraints": ["avoid_axis_misleading_scales", "save_dpi_at_least_180"],
+      "risk_level": "low",
+      "maturity": "stable",
+      "metadata": {
+        "provider_support": ["codex", "claude"],
+        "install_extra": "viz",
+        "owner": "community"
+      }
+    },
+    {
+      "id": "ml.sklearn-modeling",
+      "title": "Scikit-learn Modeling and Evaluation",
+      "domain": "machine_learning",
+      "instruction_file": "instructions/sklearn-modeling.md",
+      "description": "Leakage-safe sklearn pipelines with CV, tuning, and diagnostics.",
+      "tags": ["sklearn", "pipeline", "cross-validation", "metrics", "classification", "regression"],
+      "tool_hints": ["sklearn.pipeline", "sklearn.model_selection", "sklearn.metrics"],
+      "examples": ["Train leakage-safe classifier", "Tune model with stratified CV"],
+      "aliases": ["classical-ml", "tabular-ml"],
+      "dependencies": ["scikit-learn", "pandas", "numpy"],
+      "input_contract": {
+        "required": "feature matrix X and target y",
+        "optional": "sample weights, groups for CV"
+      },
+      "output_artifacts": ["trained_pipeline", "metrics_report", "cv_fold_scores"],
+      "quality_checks": ["train_validation_split", "no_data_leakage", "metric_variance_reported"],
+      "constraints": ["never_report_train_only_metric"],
+      "risk_level": "medium",
+      "maturity": "stable",
+      "metadata": {
+        "provider_support": ["codex", "claude"],
+        "install_extra": "ml"
+      }
+    },
+    {
+      "id": "ml.gradient-boosting",
+      "title": "Gradient Boosting with XGBoost and LightGBM",
+      "domain": "machine_learning",
+      "instruction_file": "instructions/gradient-boosting-xgb-lgbm.md",
+      "description": "High-performance boosting, tuning, and SHAP-based attribution.",
+      "tags": ["xgboost", "lightgbm", "catboost", "shap", "boosting"],
+      "tool_hints": ["xgboost", "lightgbm", "catboost", "shap"],
+      "examples": ["Tune XGBoost with early stopping", "Compare LightGBM vs CatBoost"],
+      "aliases": ["gbm", "tree-boosting"],
+      "dependencies": ["xgboost", "lightgbm", "catboost", "shap", "scikit-learn"],
+      "input_contract": {
+        "required": "tabular train/validation datasets",
+        "optional": "class weights and monotonic constraints"
+      },
+      "output_artifacts": ["booster_model", "feature_importance", "shap_summary"],
+      "quality_checks": ["early_stopping_enabled", "class_imbalance_strategy", "feature_leakage_review"],
+      "constraints": ["consistent_validation_metric_across_models"],
+      "risk_level": "medium",
+      "maturity": "stable",
+      "metadata": {
+        "provider_support": ["codex", "claude"],
+        "install_extra": "boosting"
+      }
+    },
+    {
+      "id": "dl.pytorch-training",
+      "title": "Deep Learning with PyTorch",
+      "domain": "deep_learning",
+      "instruction_file": "instructions/pytorch-training.md",
+      "description": "PyTorch training loops with mixed precision, GPU, and checkpoints.",
+      "tags": ["pytorch", "torch", "cuda", "amp", "checkpoint", "dataloader"],
+      "tool_hints": ["torch", "torch.nn", "torch.utils.data", "torch.cuda.amp"],
+      "examples": ["Train CNN with AMP", "Checkpoint best model with patience"],
+      "aliases": ["deep-learning", "torch-training"],
+      "dependencies": ["torch", "torchvision", "numpy"],
+      "input_contract": {
+        "required": "tensor-ready dataset and model definition",
+        "optional": "scheduler and mixed precision flag"
+      },
+      "output_artifacts": ["model_checkpoint", "training_history", "validation_report"],
+      "quality_checks": ["seed_set", "checkpoint_saved", "validation_evaluated"],
+      "constraints": ["do_not_skip_validation", "log_epoch_metrics"],
+      "risk_level": "high",
+      "maturity": "stable",
+      "metadata": {
+        "provider_support": ["codex", "claude"],
+        "install_extra": "deep-learning"
+      }
+    },
+    {
+      "id": "stats.scipy-statsmodels",
+      "title": "Statistical Inference with SciPy and Statsmodels",
+      "domain": "statistics",
+      "instruction_file": "instructions/statistics-scipy-statsmodels.md",
+      "description": "Hypothesis testing, ANOVA, and regression diagnostics.",
+      "tags": ["scipy", "statsmodels", "anova", "ols", "p-value", "diagnostics"],
+      "tool_hints": ["scipy.stats", "statsmodels.api", "statsmodels.formula.api"],
+      "examples": ["Run Welch t-test with effect size", "Fit OLS with robust errors"],
+      "aliases": ["inference", "classical-stats"],
+      "dependencies": ["scipy", "statsmodels", "pandas", "numpy"],
+      "input_contract": {
+        "required": "well-defined hypotheses and structured sample groups",
+        "optional": "multiple-testing correction strategy"
+      },
+      "output_artifacts": ["test_results", "model_summary", "diagnostic_plots"],
+      "quality_checks": ["assumptions_checked", "effect_size_reported", "pvalue_reported"],
+      "constraints": ["avoid_causal_claim_for_observational_data"],
+      "risk_level": "medium",
+      "maturity": "stable",
+      "metadata": {
+        "provider_support": ["codex", "claude"],
+        "install_extra": "stats"
+      }
+    },
+    {
+      "id": "chemistry.rdkit-cheminformatics",
+      "title": "Chemistry and Cheminformatics (RDKit)",
+      "domain": "chemistry",
+      "instruction_file": "instructions/chemistry-rdkit.md",
+      "description": "SMILES parsing, descriptors, fingerprints, and similarity workflows.",
+      "tags": ["chemistry", "rdkit", "smiles", "fingerprints", "substructure"],
+      "tool_hints": ["rdkit.Chem", "rdkit.Chem.AllChem", "rdkit.DataStructs"],
+      "examples": ["Compute Morgan fingerprints", "Filter by Lipinski rules"],
+      "aliases": ["cheminformatics", "molecule-analytics"],
+      "dependencies": ["rdkit", "pandas", "numpy"],
+      "input_contract": {
+        "required": "canonical SMILES list",
+        "optional": "substructure SMARTS query"
+      },
+      "output_artifacts": ["descriptor_table", "fingerprint_matrix", "similarity_rankings"],
+      "quality_checks": ["invalid_smiles_reported", "sanitization_status_logged"],
+      "constraints": ["do_not_claim_biological_efficacy_without_experimental_data"],
+      "risk_level": "high",
+      "maturity": "beta",
+      "metadata": {
+        "provider_support": ["codex", "claude"],
+        "install_extra": "chemistry"
+      }
+    },
+    {
+      "id": "cv.opencv-image-processing",
+      "title": "Computer Vision with OpenCV",
+      "domain": "computer_vision",
+      "instruction_file": "instructions/opencv-image-processing.md",
+      "description": "Image preprocessing, contour extraction, and edge/threshold pipelines.",
+      "tags": ["opencv", "cv2", "image-processing", "contour", "thresholding"],
+      "tool_hints": ["cv2", "numpy", "skimage", "pillow"],
+      "examples": ["Object counting via contours", "Document cleanup pipeline"],
+      "aliases": ["image-cv", "vision-preprocessing"],
+      "dependencies": ["opencv-python", "numpy", "scikit-image", "pillow"],
+      "input_contract": {
+        "required": "image path(s) or ndarray",
+        "optional": "ROI masks and confidence thresholds"
+      },
+      "output_artifacts": ["processed_images", "contour_stats", "detection_overlay"],
+      "quality_checks": ["image_dimensions_valid", "contrast_assessed", "transform_params_logged"],
+      "constraints": ["preserve_original_images", "log_non_detected_cases"],
+      "risk_level": "medium",
+      "maturity": "stable",
+      "metadata": {
+        "provider_support": ["codex", "claude"],
+        "install_extra": "cv"
+      }
+    },
+    {
+      "id": "geo.geopandas-spatial",
+      "title": "Geospatial Analysis with GeoPandas",
+      "domain": "geospatial",
+      "instruction_file": "instructions/geospatial-geopandas.md",
+      "description": "Spatial joins, CRS transforms, and map-ready geodata prep.",
+      "tags": ["geopandas", "shapely", "spatial-join", "crs", "choropleth"],
+      "tool_hints": ["geopandas", "shapely", "pyproj", "folium"],
+      "examples": ["Point-in-polygon joins", "Reproject and aggregate by region"],
+      "aliases": ["gis", "spatial-analytics"],
+      "dependencies": ["geopandas", "shapely", "pyproj", "fiona"],
+      "input_contract": {
+        "required": "valid geometry columns with declared CRS",
+        "optional": "boundary datasets and map styling"
+      },
+      "output_artifacts": ["joined_geodataframe", "spatial_aggregate_table", "map_ready_layers"],
+      "quality_checks": ["crs_validated", "invalid_geometries_reported", "join_predicate_logged"],
+      "constraints": ["reproject_before_metric_distance_ops"],
+      "risk_level": "medium",
+      "maturity": "stable",
+      "metadata": {
+        "provider_support": ["codex", "claude"],
+        "install_extra": "geo"
+      }
+    },
+    {
+      "id": "nlp.spacy-transformers",
+      "title": "NLP Pipelines with spaCy and Transformers",
+      "domain": "nlp",
+      "instruction_file": "instructions/nlp-spacy-transformers.md",
+      "description": "NER, text classification, and embedding-backed NLP workflows.",
+      "tags": ["nlp", "spacy", "transformers", "ner", "classification", "embeddings"],
+      "tool_hints": ["spacy", "transformers", "sentence-transformers", "nltk"],
+      "examples": ["NER extraction pipeline", "Transformer text classification"],
+      "aliases": ["language-processing", "text-ml"],
+      "dependencies": ["spacy", "transformers", "sentence-transformers", "nltk"],
+      "input_contract": {
+        "required": "text corpus with language context",
+        "optional": "label schema and confidence thresholds"
+      },
+      "output_artifacts": ["entity_table", "classification_scores", "embedding_index"],
+      "quality_checks": ["model_version_logged", "confidence_thresholds_explicit"],
+      "constraints": ["flag_low_confidence_outputs", "preserve_source_text_references"],
+      "risk_level": "high",
+      "maturity": "beta",
+      "metadata": {
+        "provider_support": ["codex", "claude"],
+        "install_extra": "nlp"
+      }
+    },
+    {
+      "id": "docs.pdf-generation",
+      "title": "PDF Report Generation",
+      "domain": "document_generation",
+      "instruction_file": "instructions/pdf-creation.md",
+      "description": "Deterministic markdown/HTML to PDF rendering for reports.",
+      "tags": ["pdf", "weasyprint", "reportlab", "markdown", "report"],
+      "tool_hints": ["weasyprint", "reportlab", "markdown"],
+      "examples": ["Render branded markdown report", "Export multi-page chart PDF"],
+      "aliases": ["pdf-rendering", "report-export"],
+      "dependencies": ["weasyprint", "reportlab", "markdown"],
+      "input_contract": {
+        "required": "markdown/html content",
+        "optional": "css overrides and output filename"
+      },
+      "output_artifacts": ["pdf_report", "render_log"],
+      "quality_checks": ["pdf_generated", "file_size_nonzero", "tables_not_clipped"],
+      "constraints": ["include_failure_fallback_message"],
+      "risk_level": "low",
+      "maturity": "stable",
+      "metadata": {
+        "provider_support": ["codex", "claude"],
+        "install_extra": "docs"
+      }
+    },
+    {
+      "id": "docs.slides-pptx",
+      "title": "Slide Deck Creation (PPTX)",
+      "domain": "presentation_generation",
+      "instruction_file": "instructions/slide-creation.md",
+      "description": "Narrative deck creation with PPTX output and chart integration.",
+      "tags": ["slides", "pptx", "python-pptx", "presentation", "storytelling"],
+      "tool_hints": ["python-pptx", "matplotlib", "pillow"],
+      "examples": ["Executive summary deck", "Findings deck with visuals"],
+      "aliases": ["deck-generation", "slide-authoring"],
+      "dependencies": ["python-pptx", "pillow", "matplotlib"],
+      "input_contract": {
+        "required": "structured storyline or slide outline",
+        "optional": "brand template and theme colors"
+      },
+      "output_artifacts": ["pptx_deck", "slide_outline", "speaker_notes_stub"],
+      "quality_checks": ["title_and_recommendation_slides_present", "visual_hierarchy_consistent"],
+      "constraints": ["one_core_message_per_slide"],
+      "risk_level": "low",
+      "maturity": "stable",
+      "metadata": {
+        "provider_support": ["codex", "claude"],
+        "install_extra": "slides"
+      }
+    }
+  ]
+}

@@ -1,0 +1,334 @@
+experts:
+  - id: viz.matplotlib-seaborn
+    title: Visualization with Matplotlib and Seaborn
+    domain: visualization
+    instruction_file: instructions/visualization-matplotlib-seaborn.md
+    description: Retrieve this expert for publication-quality charting, statistical visualization, and figure export workflows.
+    tags:
+      - matplotlib
+      - seaborn
+      - chart
+      - heatmap
+      - lineplot
+      - scatterplot
+      - dashboard
+      - styling
+    tool_hints:
+      - matplotlib.pyplot
+      - seaborn
+      - pandas
+    examples:
+      - Build a 2x2 dashboard with trend, distribution, and correlation views
+      - Export publication-ready PNG charts for a technical report
+
+  - id: ml.model-export
+    title: Machine Learning Model Export and Packaging
+    domain: machine_learning
+    instruction_file: instructions/machine-learning-export.md
+    description: Retrieve this expert for saving trained models with reproducible metadata and deployment-safe export formats.
+    tags:
+      - machine-learning
+      - model-export
+      - pickle
+      - joblib
+      - onnx
+      - sklearn
+      - xgboost
+    tool_hints:
+      - joblib
+      - pickle
+      - skl2onnx
+      - onnxruntime
+    examples:
+      - Export an sklearn pipeline with version metadata
+      - Convert gradient-boosted model to ONNX for serving
+
+  - id: ml.sklearn-modeling
+    title: Scikit-learn Modeling and Evaluation
+    domain: machine_learning
+    instruction_file: instructions/sklearn-modeling.md
+    description: Retrieve this expert for feature preprocessing, model selection, cross-validation, and robust sklearn evaluation pipelines.
+    tags:
+      - sklearn
+      - cross-validation
+      - pipeline
+      - feature-selection
+      - hyperparameter-tuning
+      - classification
+      - regression
+      - metrics
+    tool_hints:
+      - sklearn.pipeline
+      - sklearn.model_selection
+      - sklearn.compose
+      - sklearn.metrics
+    examples:
+      - Build a leakage-safe sklearn pipeline with stratified cross-validation
+      - Tune gradient boosting and evaluate calibration and confusion matrix
+
+  - id: ml.gradient-boosting
+    title: Gradient Boosting with XGBoost and LightGBM
+    domain: machine_learning
+    instruction_file: instructions/gradient-boosting-xgb-lgbm.md
+    description: Retrieve this expert for high-performance tree boosting workflows, tuning, feature attribution, and production export.
+    tags:
+      - xgboost
+      - lightgbm
+      - catboost
+      - gradient-boosting
+      - early-stopping
+      - feature-importance
+      - shap
+      - tabular
+    tool_hints:
+      - xgboost
+      - lightgbm
+      - catboost
+      - shap
+    examples:
+      - Train and tune an XGBoost classifier with calibrated probabilities
+      - Compare LightGBM and CatBoost with cross-validation and SHAP interpretation
+
+  - id: dl.pytorch-training
+    title: Deep Learning with PyTorch
+    domain: deep_learning
+    instruction_file: instructions/pytorch-training.md
+    description: Retrieve this expert for PyTorch model training loops, GPU utilization, mixed precision, and checkpointed experiments.
+    tags:
+      - pytorch
+      - torch
+      - neural-network
+      - dataloader
+      - cuda
+      - mixed-precision
+      - checkpoint
+      - training-loop
+    tool_hints:
+      - torch
+      - torch.nn
+      - torch.utils.data
+      - torch.cuda.amp
+    examples:
+      - Build a PyTorch training loop with early stopping and checkpoint save
+      - Train a CNN with mixed precision and evaluate on validation split
+
+  - id: stats.scipy-statsmodels
+    title: Statistical Inference with SciPy and Statsmodels
+    domain: statistics
+    instruction_file: instructions/statistics-scipy-statsmodels.md
+    description: Retrieve this expert for hypothesis testing, regression diagnostics, ANOVA, and confidence interval workflows.
+    tags:
+      - scipy
+      - statsmodels
+      - hypothesis-testing
+      - p-value
+      - anova
+      - ols
+      - confidence-interval
+      - diagnostics
+    tool_hints:
+      - scipy.stats
+      - statsmodels.api
+      - statsmodels.formula.api
+      - statsmodels.stats
+    examples:
+      - Run Welch t-test and Mann-Whitney with effect sizes
+      - Fit OLS model with robust standard errors and residual diagnostics
+
+  - id: scipy.optimization-signal
+    title: Scientific Computing with SciPy
+    domain: scientific_computing
+    instruction_file: instructions/scipy-optimization-signal.md
+    description: Retrieve this expert for optimization, curve fitting, integration, ODE solving, and signal processing tasks.
+    tags:
+      - scipy
+      - optimize
+      - curve-fit
+      - ode
+      - integration
+      - interpolation
+      - signal-processing
+      - fft
+    tool_hints:
+      - scipy.optimize
+      - scipy.integrate
+      - scipy.interpolate
+      - scipy.signal
+    examples:
+      - Calibrate nonlinear parameters with bounds and confidence estimates
+      - Detect peaks and smooth noisy sensor time-series data
+
+  - id: chemistry.rdkit-cheminformatics
+    title: Chemistry and Cheminformatics (RDKit)
+    domain: chemistry
+    instruction_file: instructions/chemistry-rdkit.md
+    description: Retrieve this expert for molecule parsing, descriptor extraction, substructure search, and similarity workflows.
+    tags:
+      - chemistry
+      - rdkit
+      - smiles
+      - fingerprints
+      - molecular-descriptors
+      - substructure
+      - similarity
+      - medicinal-chemistry
+    tool_hints:
+      - rdkit.Chem
+      - rdkit.Chem.AllChem
+      - rdkit.Chem.Descriptors
+      - rdkit.DataStructs
+    examples:
+      - Compute Morgan fingerprints and nearest-neighbor similarity ranking
+      - Filter molecules by Lipinski properties and substructure patterns
+
+  - id: graph.networkx-analytics
+    title: Graph Analytics with NetworkX
+    domain: graph_analytics
+    instruction_file: instructions/graph-networkx.md
+    description: Retrieve this expert for graph construction, centrality analysis, community detection, and path-based reasoning tasks.
+    tags:
+      - networkx
+      - graph
+      - centrality
+      - community-detection
+      - shortest-path
+      - pagerank
+      - node-link
+      - knowledge-graph
+    tool_hints:
+      - networkx
+      - scipy.sparse
+      - pandas
+      - matplotlib
+    examples:
+      - Compute centrality and detect communities in an interaction network
+      - Analyze shortest paths and bottleneck nodes in a supply graph
+
+  - id: cv.opencv-image-processing
+    title: Computer Vision with OpenCV
+    domain: computer_vision
+    instruction_file: instructions/opencv-image-processing.md
+    description: Retrieve this expert for image preprocessing, feature extraction, contour analysis, and CV pipeline prototyping.
+    tags:
+      - opencv
+      - cv2
+      - image-processing
+      - edge-detection
+      - contour
+      - thresholding
+      - feature-matching
+      - segmentation
+    tool_hints:
+      - cv2
+      - numpy
+      - skimage
+      - pillow
+    examples:
+      - Detect edges and contours for object counting workflow
+      - Build an OpenCV preprocessing pipeline for document cleanup
+
+  - id: geo.geopandas-spatial
+    title: Geospatial Analysis with GeoPandas
+    domain: geospatial
+    instruction_file: instructions/geospatial-geopandas.md
+    description: Retrieve this expert for geospatial joins, coordinate transforms, spatial indexing, and map-ready data preparation.
+    tags:
+      - geopandas
+      - shapely
+      - geospatial
+      - projection
+      - spatial-join
+      - choropleth
+      - crs
+      - geodataframe
+    tool_hints:
+      - geopandas
+      - shapely
+      - pyproj
+      - folium
+    examples:
+      - Perform point-in-polygon spatial joins and aggregate by region
+      - Reproject geometries and build choropleth-ready GeoDataFrames
+
+  - id: nlp.spacy-transformers
+    title: NLP Pipelines with spaCy and Transformers
+    domain: nlp
+    instruction_file: instructions/nlp-spacy-transformers.md
+    description: Retrieve this expert for tokenization, NER, text classification, and embedding-enriched NLP pipelines.
+    tags:
+      - nlp
+      - spacy
+      - transformers
+      - tokenization
+      - named-entity-recognition
+      - text-classification
+      - embeddings
+      - language-model
+    tool_hints:
+      - spacy
+      - transformers
+      - sentence-transformers
+      - nltk
+    examples:
+      - Build NER extraction pipeline and normalize entities into tables
+      - Run transformer-based text classification with confidence filtering
+
+  - id: docs.pdf-generation
+    title: PDF Report Generation
+    domain: document_generation
+    instruction_file: instructions/pdf-creation.md
+    description: Retrieve this expert for markdown/HTML-to-PDF generation, print styling, and deterministic export.
+    tags:
+      - pdf
+      - report
+      - html-to-pdf
+      - markdown
+      - weasyprint
+      - reportlab
+    tool_hints:
+      - weasyprint
+      - reportlab
+      - markdown
+    examples:
+      - Convert analysis markdown into a branded PDF memo
+      - Generate a multi-page PDF with tables and charts
+
+  - id: docs.slides-pptx
+    title: Slide Deck Creation (PPTX)
+    domain: presentation_generation
+    instruction_file: instructions/slide-creation.md
+    description: Retrieve this expert for structured slide narratives, PPTX authoring, and speaker-ready deck output.
+    tags:
+      - slides
+      - pptx
+      - presentation
+      - python-pptx
+      - storytelling
+      - executive-summary
+    tool_hints:
+      - python-pptx
+      - matplotlib
+      - pillow
+    examples:
+      - Build a 10-slide executive deck from analysis artifacts
+      - Export a presentation with chart images and key takeaways
+
+  - id: data.schema-normalization
+    title: Schema and Cleaning Specialist
+    domain: data_engineering
+    instruction_file: instructions/data-cleaning.md
+    description: Retrieve this expert for payload normalization, dataframe conversion, and quarter/date alignment.
+    tags:
+      - data-cleaning
+      - schema
+      - pandas
+      - coercion
+      - align-quarterly
+      - null-handling
+    tool_hints:
+      - pandas
+      - pyarrow
+      - data_processing.cleaner.dict_to_dataframe
+    examples:
+      - Fix mixed dict/list payload before metric extraction
+      - Align quarterly reports and coerce numeric columns safely
