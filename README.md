@@ -1,4 +1,4 @@
-# SkillGate
+# SkillMesh
 
 **A retrieval-gated skill architecture for LLM agents that scales to hundreds of tools by exposing only the top-K relevant capabilities per request.**
 
@@ -75,7 +75,7 @@ Current sample catalog includes:
 ## Quickstart
 
 ```bash
-cd SkillGate
+cd SkillMesh
 python -m venv .venv
 source .venv/bin/activate
 pip install -e .[dev]
@@ -128,14 +128,14 @@ pytest
 
 ## Codex Skill Bundle (installable)
 
-SkillGate ships a Codex-native skill bundle at:
+SkillMesh ships a Codex-native skill bundle at:
 
-- `skills/.experimental/skillgate-router`
+- `skills/.experimental/SkillMesh-router`
 
 Install with:
 
 ```bash
-$skill-installer install https://github.com/varunreddy/SkillGate/tree/main/skills/.experimental/skillgate-router
+$skill-installer install https://github.com/varunreddy/SkillMesh/tree/main/skills/.experimental/SkillMesh-router
 ```
 
 Bundle command:
@@ -147,7 +147,7 @@ skill-rag emit --provider codex --registry <path> --query "<query>" --top-k 5
 Local router script:
 
 ```bash
-skills/.experimental/skillgate-router/scripts/route.sh --provider codex --registry <path> --query "<query>" --top-k 5
+skills/.experimental/SkillMesh-router/scripts/route.sh --provider codex --registry <path> --query "<query>" --top-k 5
 ```
 
 Claude integration docs:
