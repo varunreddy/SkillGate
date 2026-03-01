@@ -5,8 +5,9 @@ from __future__ import annotations
 import re
 from typing import Optional
 
+from typing import Any
 import numpy as np
-from rank_bm25 import BM25Okapi
+from rank_bm25 import BM25Okapi  # type: ignore  # type: ignore
 
 from ..models import ExpertCard, RetrievalHit
 
@@ -15,7 +16,7 @@ def _tokenize(text: str) -> list[str]:
     return re.findall(r"[a-zA-Z0-9_\.]+", str(text or "").lower())
 
 
-def _rrf(ranks: list[np.ndarray], n_docs: int, k: int = 60) -> np.ndarray:
+def _rrf(ranks: list[np.ndarray[Any, Any]], n_docs: int, k: int = 60) -> np.ndarray[Any, Any]:
     scores = np.zeros(n_docs, dtype=np.float32)
     for order in ranks:
         for rank, idx in enumerate(order, start=1):
@@ -33,7 +34,7 @@ class InMemoryBackend:
         self._tokens: list[list[str]] = []
         self._bm25: Optional[BM25Okapi] = None
         self._dense_model = None
-        self._dense_embeddings: Optional[np.ndarray] = None
+        self._dense_embeddings: Optional[np.ndarray[Any, Any]] = None
 
     # ------------------------------------------------------------------
     # RetrievalBackend interface
@@ -112,7 +113,7 @@ class InMemoryBackend:
 
     def _init_dense(self) -> None:
         try:
-            from sentence_transformers import SentenceTransformer
+            from sentence_transformers import SentenceTransformer  # type: ignore  # type: ignore
 
             model = SentenceTransformer("BAAI/bge-small-en-v1.5")
             embs = model.encode(self._doc_texts, normalize_embeddings=True)
@@ -122,7 +123,7 @@ class InMemoryBackend:
             self._dense_model = None
             self._dense_embeddings = None
 
-    def _sparse_scores(self, query: str) -> np.ndarray:
+    def _sparse_scores(self, query: str) -> np.ndarray[Any, Any]:
         n = len(self._cards)
         if n == 0:
             return np.array([], dtype=np.float32)
@@ -144,7 +145,7 @@ class InMemoryBackend:
             overlaps.append((inter / union) if union else 0.0)
         return np.asarray(overlaps, dtype=np.float32)
 
-    def _dense_scores(self, query: str) -> Optional[np.ndarray]:
+    def _dense_scores(self, query: str) -> Optional[np.ndarray[Any, Any]]:
         if self._dense_model is None or self._dense_embeddings is None:
             return None
         try:

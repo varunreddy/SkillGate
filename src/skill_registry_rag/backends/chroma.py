@@ -5,8 +5,9 @@ import os
 from pathlib import Path
 from typing import Optional
 
+from typing import Any
 import numpy as np
-from rank_bm25 import BM25Okapi
+from rank_bm25 import BM25Okapi  # type: ignore
 
 from ..models import ExpertCard, RetrievalHit
 from .memory import _tokenize, _rrf
@@ -44,7 +45,7 @@ def _compose_doc(card: ExpertCard) -> str:
 
 class ChromaBackend:
     def __init__(self, *, collection_name: str = "skillmesh_experts", data_dir: str | Path | None = None, ephemeral: bool = False):
-        import chromadb
+        import chromadb  # type: ignore
 
         self._collection_name = collection_name
         self._ephemeral = ephemeral
@@ -103,13 +104,14 @@ class ChromaBackend:
         batch_size = 500
         for i in range(0, len(ids), batch_size):
             end = min(i + batch_size, len(ids))
+            assert self._collection is not None
             self._collection.upsert(
                 ids=ids[i:end],
                 documents=documents[i:end],
                 metadatas=metadatas[i:end],
             )
 
-    def _sparse_scores(self, query: str) -> np.ndarray:
+    def _sparse_scores(self, query: str) -> np.ndarray[Any, Any]:
         n = len(self._cards)
         if n == 0:
             return np.array([], dtype=np.float32)
