@@ -4,7 +4,7 @@ from .backends import RetrievalBackend
 from .backends.memory import InMemoryBackend
 from .models import ExpertCard, RetrievalHit, ToolCard
 from .registry import load_registry
-from .retriever import SkillRetriever
+from .retriever import SkillRetriever  # type: ignore
 
 __all__ = [
     "ExpertCard",

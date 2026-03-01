@@ -6,7 +6,7 @@ import sys
 
 from .adapters import render_claude_context, render_codex_context
 from .registry import RegistryError, load_registry
-from .retriever import SkillRetriever
+from .retriever import SkillRetriever  # type: ignore
 
 
 def _build_parser() -> argparse.ArgumentParser:
