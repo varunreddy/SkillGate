@@ -4,7 +4,12 @@ from pathlib import Path
 
 import pytest
 
-from skill_registry_rag.mcp_server import build_routed_context, retrieve_cards_payload
+from skill_registry_rag.mcp_server import (
+    build_routed_context,
+    install_role_payload,
+    list_roles_payload,
+    retrieve_cards_payload,
+)
 
 
 def _example_registry() -> Path:
@@ -58,3 +63,37 @@ def test_build_routed_context_rejects_invalid_top_k():
             backend="memory",
             provider="claude",
         )
+
+
+def test_list_roles_payload_returns_friendly_names():
+    payload = list_roles_payload(catalog=str(_example_registry()))
+    assert payload["roles"]
+    first = payload["roles"][0]
+    assert "name" in first
+
+
+def test_install_role_payload_accepts_friendly_name(tmp_path):
+    target = tmp_path / "mcp-installed.registry.yaml"
+    payload = install_role_payload(
+        role="Data-Analyst",
+        catalog=str(_example_registry()),
+        registry=str(target),
+    )
+    assert payload["role_id"] == "role.data-analyst"
+    assert "role.data-analyst" in payload["added_ids"]
+
+
+def test_list_roles_payload_installed_only(tmp_path):
+    target = tmp_path / "mcp-installed-only.registry.yaml"
+    install_role_payload(
+        role="DevOps-Engineer",
+        catalog=str(_example_registry()),
+        registry=str(target),
+    )
+    payload = list_roles_payload(
+        catalog=str(_example_registry()),
+        registry=str(target),
+        installed_only=True,
+    )
+    ids = {role["id"] for role in payload["roles"]}
+    assert ids == {"role.devops-engineer"}

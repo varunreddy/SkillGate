@@ -28,26 +28,31 @@ export SKILLMESH_REGISTRY=/absolute/path/to/tools.json
 
 ## 4) Role commands (optional)
 
-List available roles from the catalog:
+Interactive role install (recommended):
 
 ```bash
-skillmesh roles list \
-  --catalog /absolute/path/to/tools.json
+skillmesh roles
 ```
 
-Install a role plus only missing dependency cards into your working registry:
+List roles:
 
 ```bash
-skillmesh roles install \
-  --catalog /absolute/path/to/tools.json \
-  --registry /absolute/path/to/my-installed.registry.yaml \
-  --role-id role.data-engineer
+skillmesh roles list
 ```
 
-If some dependency cards already exist in `--registry`, install only appends the missing ones.
+Install a specific role:
+
+```bash
+skillmesh Data-Engineer install
+```
+
+Defaults:
+- Catalog defaults to `SKILLMESH_CATALOG`, then `SKILLMESH_REGISTRY`, then bundled registry.
+- Target role registry defaults to `SKILLMESH_ROLE_REGISTRY`, then `SKILLMESH_REGISTRY`, then `~/.codex/skills/skillmesh/installed.registry.yaml`.
+- Existing cards are deduplicated; only missing dependency cards are added.
 
 If you prefer skill-bundle wrappers, use:
-`~/.codex/skills/skillmesh/scripts/roles.sh list|install ...`
+`~/.codex/skills/skillmesh/scripts/roles.sh` (interactive)
 
 ## 5) Continue with routed context only
 

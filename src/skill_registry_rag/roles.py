@@ -18,6 +18,66 @@ class RoleCatalogError(ValueError):
     """Raised when role catalog operations fail."""
 
 
+def friendly_role_name(role_id: str) -> str:
+    suffix = str(role_id).strip().split(".", 1)[-1]
+    chunks = [part for part in suffix.replace("_", "-").split("-") if part]
+    expanded: list[str] = []
+    for chunk in chunks:
+        low = chunk.lower()
+        if low == "ml":
+            expanded.extend(["Machine", "Learning"])
+        elif low == "bi":
+            expanded.extend(["Business", "Intelligence"])
+        elif low == "api":
+            expanded.append("API")
+        elif low == "gcp":
+            expanded.append("GCP")
+        elif low == "devops":
+            expanded.append("DevOps")
+        else:
+            expanded.append(chunk.capitalize())
+    return "-".join(expanded) if expanded else str(role_id).strip()
+
+
+def _role_selector_key(value: str) -> str:
+    return "".join(ch for ch in str(value).lower() if ch.isalnum())
+
+
+def resolve_role_selector(selector: str, offers: list[dict[str, Any]]) -> str:
+    selected = str(selector or "").strip()
+    if not selected:
+        raise RoleCatalogError("Missing role selector.")
+
+    key = _role_selector_key(selected)
+    matches: list[str] = []
+    for offer in offers:
+        role_id = str(offer["id"])
+        suffix = role_id.split(".", 1)[-1]
+        title = str(offer.get("title", ""))
+        title_short = title.replace(" Role Orchestrator", "").strip()
+        variants = {
+            role_id,
+            suffix,
+            friendly_role_name(role_id),
+            friendly_role_name(role_id).replace("-", " "),
+            title,
+            title_short,
+        }
+        if key in {_role_selector_key(v) for v in variants}:
+            matches.append(role_id)
+
+    unique_matches = sorted(set(matches))
+    if len(unique_matches) == 1:
+        return unique_matches[0]
+    if not unique_matches:
+        raise RoleCatalogError(
+            f"Unknown role selector: '{selected}'. Run `skillmesh roles list`."
+        )
+
+    pretty = ", ".join(friendly_role_name(role_id) for role_id in unique_matches)
+    raise RoleCatalogError(f"Ambiguous role selector '{selected}'. Matches: {pretty}")
+
+
 def _read_registry_document(path: Path) -> Any:
     text = path.read_text(encoding="utf-8")
     suffix = path.suffix.lower()
@@ -289,15 +349,24 @@ def install_role_bundle(
         if instruction_file:
             source_instruction = (catalog_root / instruction_file).resolve()
             target_instruction = (target_path.parent / instruction_file).resolve()
-            if not source_instruction.exists():
+            inline_instruction = str(entry_copy.get("instruction_text", "")).strip()
+            if source_instruction.exists():
+                if dry_run and not target_instruction.exists():
+                    copied_instruction_files.append(str(target_instruction))
+                elif not dry_run and not target_instruction.exists():
+                    target_instruction.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(source_instruction, target_instruction)
+                    copied_instruction_files.append(str(target_instruction))
+            elif inline_instruction:
+                if dry_run and not target_instruction.exists():
+                    copied_instruction_files.append(str(target_instruction))
+                elif not dry_run and not target_instruction.exists():
+                    target_instruction.parent.mkdir(parents=True, exist_ok=True)
+                    target_instruction.write_text(inline_instruction + "\n", encoding="utf-8")
+                    copied_instruction_files.append(str(target_instruction))
+            else:
                 unresolved_dependencies.append(card_id)
                 continue
-            if dry_run and not target_instruction.exists():
-                copied_instruction_files.append(str(target_instruction))
-            elif not dry_run and not target_instruction.exists():
-                target_instruction.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(source_instruction, target_instruction)
-                copied_instruction_files.append(str(target_instruction))
 
         target_entries.append(entry_copy)
         existing_ids.add(card_id)

@@ -20,6 +20,10 @@ Add to your Claude Code MCP settings (`.claude/settings.json` or via `claude mcp
 Requires [uv](https://docs.astral.sh/uv/getting-started/installation/). No env vars or file paths needed.
 
 Once configured, Claude Code can call `route_with_skillmesh()` and `retrieve_skillmesh_cards()` automatically.
+It can also manage roles directly over MCP:
+- `list_skillmesh_roles()`
+- `list_installed_skillmesh_roles()`
+- `install_skillmesh_role(role="Data-Analyst")`
 
 ## Option B: Skill bundle + CLI
 
@@ -44,24 +48,31 @@ Restart Codex after install.
 
 ### 3) Role commands (optional)
 
-List available roles:
+Interactive role install (recommended):
 
 ```bash
-skillmesh roles list \
-  --catalog /absolute/path/to/tools.json
+skillmesh roles
 ```
 
-Install a selected role plus missing dependency cards into a target registry:
+List roles:
 
 ```bash
-skillmesh roles install \
-  --catalog /absolute/path/to/tools.json \
-  --registry /absolute/path/to/my-installed.registry.yaml \
-  --role-id role.devops-engineer
+skillmesh roles list
 ```
+
+Install a specific role:
+
+```bash
+skillmesh DevOps-Engineer install
+```
+
+Defaults:
+- Catalog defaults to `SKILLMESH_CATALOG`, then `SKILLMESH_REGISTRY`, then bundled registry.
+- Target role registry defaults to `SKILLMESH_ROLE_REGISTRY`, then `SKILLMESH_REGISTRY`, then `~/.codex/skills/skillmesh/installed.registry.yaml`.
+- Existing cards are deduplicated; only missing dependency cards are added.
 
 If you prefer skill-bundle wrappers, use:
-`~/.codex/skills/skillmesh/scripts/roles.sh list|install ...`
+`~/.codex/skills/skillmesh/scripts/roles.sh` (interactive)
 
 ### 4) Use in Claude Code workflow
 

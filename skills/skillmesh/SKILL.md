@@ -19,14 +19,15 @@ scripts/route.sh --provider codex --registry <path> --query "<query>" --top-k 5
 List available roles and install a role bundle (role card + missing dependency cards):
 
 ```bash
-skillmesh roles list --catalog <catalog-path>
-skillmesh roles install --catalog <catalog-path> --registry <target-registry> --role-id role.data-engineer
+skillmesh roles
+skillmesh roles list
+skillmesh Data-Analyst install
 ```
 
 Use `--dry-run` to preview install changes.
 
 If `skillmesh` is not on `PATH`, use:
-`scripts/roles.sh list|install ...`
+`scripts/roles.sh` (interactive)
 
 ## Parameters
 - `--registry`: Registry file path (`tools.yaml`, `tools.json`, or `roles.registry.yaml`).

@@ -4,19 +4,178 @@ import argparse
 import json
 import os
 import sys
+from pathlib import Path
 
 from ._resolve import resolve_registry_path
 from .adapters import render_claude_context, render_codex_context
-from .roles import RoleCatalogError, install_role_bundle, list_role_offers
+from .roles import (
+    RoleCatalogError,
+    friendly_role_name,
+    install_role_bundle,
+    list_role_offers,
+    resolve_role_selector,
+)
 from .registry import RegistryError, load_registry
 from .retriever import SkillRetriever
+
+_TOP_LEVEL_COMMANDS = {"index", "retrieve", "emit", "roles"}
 
 
 def _default_catalog_path() -> str:
     env_catalog = os.getenv("SKILLMESH_CATALOG", "").strip()
     if env_catalog:
         return env_catalog
-    return os.getenv("SKILLMESH_REGISTRY", "").strip()
+    try:
+        return str(resolve_registry_path(None))
+    except ValueError:
+        return ""
+
+
+def _default_role_registry_path() -> str:
+    role_registry = os.getenv("SKILLMESH_ROLE_REGISTRY", "").strip()
+    if role_registry:
+        return role_registry
+
+    explicit_registry = os.getenv("SKILLMESH_REGISTRY", "").strip()
+    if explicit_registry:
+        return explicit_registry
+
+    return str((Path.home() / ".codex" / "skills" / "skillmesh" / "installed.registry.yaml"))
+
+
+def _print_role_offers(offers: list[dict[str, object]], *, catalog: str, registry: str = "") -> None:
+    print(f"Catalog: {catalog}")
+    if registry:
+        print(f"Installed registry: {registry}")
+    print(f"Roles available: {len(offers)}")
+    print("")
+    print("ROLE | DEPENDENCIES | INSTALLED | TITLE")
+    for offer in offers:
+        role_id = str(offer["id"])
+        installed = "yes" if bool(offer["installed"]) else "no"
+        print(
+            f"{friendly_role_name(role_id)} | {offer['dependency_count']} | "
+            f"{installed} | {offer['title']}"
+        )
+
+
+def _print_installed_roles(offers: list[dict[str, object]], *, registry: str) -> None:
+    installed = [offer for offer in offers if bool(offer["installed"])]
+    print(f"Installed registry: {registry}")
+    print(f"Installed roles: {len(installed)}")
+    if not installed:
+        print("No roles installed. Run `skillmesh roles wizard` or `skillmesh <Role-Name> install`.")
+        return
+    print("")
+    print("ROLE | DEPENDENCIES | TITLE")
+    for offer in installed:
+        role_id = str(offer["id"])
+        print(f"{friendly_role_name(role_id)} | {offer['dependency_count']} | {offer['title']}")
+
+
+def _print_install_result(result: dict[str, object], *, dry_run: bool) -> None:
+    action = "Dry run for" if dry_run else "Installed"
+    role_id = str(result["role_id"])
+    print(f"{action} role bundle: {friendly_role_name(role_id)}")
+    print(f"Catalog: {result['catalog_registry']}")
+    print(f"Target registry: {result['target_registry']}")
+    print(
+        f"Added cards: {len(result['added_ids'])} "
+        f"({', '.join(result['added_ids']) if result['added_ids'] else 'none'})"
+    )
+    print(
+        f"Already present: {len(result['already_present_ids'])} "
+        "("
+        f"{', '.join(result['already_present_ids']) if result['already_present_ids'] else 'none'}"
+        ")"
+    )
+    if result["copied_instruction_files"]:
+        print(
+            f"Instruction files {'to copy' if dry_run else 'copied'}: "
+            f"{len(result['copied_instruction_files'])}"
+        )
+    if result["unresolved_dependencies"]:
+        print(
+            "Unresolved dependencies: "
+            + ", ".join(result["unresolved_dependencies"])
+        )
+
+
+def _run_roles_wizard(*, catalog: str, registry: str, dry_run: bool) -> int:
+    offers = list_role_offers(catalog_registry=catalog, installed_registry=(registry or None))
+    if not offers:
+        print("No roles found in catalog.")
+        return 2
+
+    print("SkillMesh Role Wizard")
+    print(f"Catalog: {catalog}")
+    print(f"Target registry: {registry}")
+    print("")
+    for idx, offer in enumerate(offers, start=1):
+        role_id = str(offer["id"])
+        installed = "installed" if bool(offer["installed"]) else "new"
+        print(
+            f"{idx}. {friendly_role_name(role_id)} ({offer['dependency_count']} deps, {installed})"
+            f" - {offer['title']}"
+        )
+
+    selected_role_id = ""
+    while not selected_role_id:
+        choice = input("Select role by number or id (q to cancel): ").strip()
+        if choice.lower() in {"q", "quit", "exit"}:
+            print("Cancelled.")
+            return 0
+        if choice.isdigit():
+            n = int(choice)
+            if 1 <= n <= len(offers):
+                selected_role_id = str(offers[n - 1]["id"])
+                break
+        else:
+            try:
+                selected_role_id = resolve_role_selector(choice, offers)
+                break
+            except RoleCatalogError:
+                selected_role_id = ""
+        print("Invalid selection. Enter a number, role id, or q.")
+
+    confirmation = input(
+        f"Install {selected_role_id} into {registry}? [Y/n]: "
+    ).strip().lower()
+    if confirmation not in {"", "y", "yes"}:
+        print("Cancelled.")
+        return 0
+
+    result = install_role_bundle(
+        catalog_registry=catalog,
+        target_registry=registry,
+        role_id=selected_role_id,
+        dry_run=bool(dry_run),
+    )
+    _print_install_result(result, dry_run=bool(dry_run))
+    return 0
+
+
+def _normalize_cli_argv(argv: list[str] | None) -> list[str]:
+    args = list(argv if argv is not None else sys.argv[1:])
+    if not args:
+        return args
+
+    # `skillmesh roles` -> show installed roles
+    if args[0].strip().lower() == "roles":
+        if len(args) == 1 or args[1].startswith("-"):
+            return ["roles", "installed", *args[1:]]
+        return args
+
+    # Friendly shorthand: `skillmesh Data-Analyst install`
+    if (
+        len(args) >= 2
+        and args[1].strip().lower() == "install"
+        and args[0].strip().lower() not in _TOP_LEVEL_COMMANDS
+        and not args[0].startswith("-")
+    ):
+        return ["roles", "install", "--role-id", args[0], *args[2:]]
+
+    return args
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -55,7 +214,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
 
     roles = sub.add_parser("roles", help="Role commands")
-    roles_sub = roles.add_subparsers(dest="roles_command", required=True)
+    roles_sub = roles.add_subparsers(dest="roles_command", required=False)
 
     roles_list = roles_sub.add_parser("list", help="List available role cards from catalog")
     roles_list.add_argument(
@@ -65,7 +224,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     roles_list.add_argument(
         "--registry",
-        default="",
+        default=_default_role_registry_path(),
         help="Optional installed registry path for showing installed/missing status",
     )
     roles_list.add_argument("--json", action="store_true", help="Emit JSON output")
@@ -81,7 +240,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     roles_install.add_argument(
         "--registry",
-        required=True,
+        default=_default_role_registry_path(),
         help="Target registry YAML/JSON to write role/dependency cards into",
     )
     roles_install.add_argument(
@@ -91,6 +250,38 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     roles_install.add_argument("--dry-run", action="store_true", help="Show changes only")
     roles_install.add_argument("--json", action="store_true", help="Emit JSON output")
+
+    roles_wizard = roles_sub.add_parser(
+        "wizard",
+        help="Interactive role picker that installs into a target registry",
+    )
+    roles_wizard.add_argument(
+        "--catalog",
+        default=_default_catalog_path(),
+        help="Path to source tools/roles catalog YAML/JSON",
+    )
+    roles_wizard.add_argument(
+        "--registry",
+        default=_default_role_registry_path(),
+        help="Target registry YAML/JSON to write role/dependency cards into",
+    )
+    roles_wizard.add_argument("--dry-run", action="store_true", help="Show changes only")
+
+    roles_installed = roles_sub.add_parser(
+        "installed",
+        help="Show only installed roles",
+    )
+    roles_installed.add_argument(
+        "--catalog",
+        default=_default_catalog_path(),
+        help="Path to source tools/roles catalog YAML/JSON",
+    )
+    roles_installed.add_argument(
+        "--registry",
+        default=_default_role_registry_path(),
+        help="Installed registry YAML/JSON path",
+    )
+    roles_installed.add_argument("--json", action="store_true", help="Emit JSON output")
 
     return parser
 
@@ -124,8 +315,9 @@ def _hits_payload(hits):
 
 
 def main(argv: list[str] | None = None) -> int:
+    normalized_argv = _normalize_cli_argv(argv)
     parser = _build_parser()
-    args = parser.parse_args(argv)
+    args = parser.parse_args(normalized_argv)
 
     if args.command == "roles":
         catalog = str(getattr(args, "catalog", "") or "").strip()
@@ -136,64 +328,52 @@ def main(argv: list[str] | None = None) -> int:
             )
             return 2
 
+        registry = str(getattr(args, "registry", "") or "").strip()
         try:
-            if args.roles_command == "list":
+            if args.roles_command in {None, "installed", "list"}:
                 offers = list_role_offers(
                     catalog_registry=catalog,
-                    installed_registry=(args.registry or None),
+                    installed_registry=(registry or None),
                 )
-                if args.json:
+                if args.roles_command in {None, "installed"}:
+                    installed = [offer for offer in offers if bool(offer["installed"])]
+                    if getattr(args, "json", False):
+                        print(json.dumps({"roles": installed}, indent=2))
+                        return 0
+                    _print_installed_roles(offers, registry=registry)
+                    return 0
+
+                if getattr(args, "json", False):
                     print(json.dumps({"roles": offers}, indent=2))
                     return 0
 
-                print(f"Catalog: {catalog}")
-                if args.registry:
-                    print(f"Installed registry: {args.registry}")
-                print(f"Roles available: {len(offers)}")
-                print("")
-                print("ID | DEPENDENCIES | INSTALLED | TITLE")
-                for offer in offers:
-                    installed = "yes" if offer["installed"] else "no"
-                    print(
-                        f"{offer['id']} | {offer['dependency_count']} | "
-                        f"{installed} | {offer['title']}"
-                    )
+                _print_role_offers(offers, catalog=catalog, registry=registry)
                 return 0
 
+            if args.roles_command == "wizard":
+                try:
+                    return _run_roles_wizard(
+                        catalog=catalog,
+                        registry=registry,
+                        dry_run=bool(args.dry_run),
+                    )
+                except (EOFError, KeyboardInterrupt):
+                    print("\nCancelled.")
+                    return 130
+
+            role_offers = list_role_offers(catalog_registry=catalog)
+            resolved_role_id = resolve_role_selector(args.role_id, role_offers)
             result = install_role_bundle(
                 catalog_registry=catalog,
-                target_registry=args.registry,
-                role_id=args.role_id,
+                target_registry=registry,
+                role_id=resolved_role_id,
                 dry_run=bool(args.dry_run),
             )
             if args.json:
                 print(json.dumps(result, indent=2))
                 return 0
 
-            action = "Dry run for" if args.dry_run else "Installed"
-            print(f"{action} role bundle: {result['role_id']}")
-            print(f"Catalog: {result['catalog_registry']}")
-            print(f"Target registry: {result['target_registry']}")
-            print(
-                f"Added cards: {len(result['added_ids'])} "
-                f"({', '.join(result['added_ids']) if result['added_ids'] else 'none'})"
-            )
-            print(
-                f"Already present: {len(result['already_present_ids'])} "
-                "("
-                f"{', '.join(result['already_present_ids']) if result['already_present_ids'] else 'none'}"
-                ")"
-            )
-            if result["copied_instruction_files"]:
-                print(
-                    f"Instruction files {'to copy' if args.dry_run else 'copied'}: "
-                    f"{len(result['copied_instruction_files'])}"
-                )
-            if result["unresolved_dependencies"]:
-                print(
-                    "Unresolved dependencies: "
-                    + ", ".join(result["unresolved_dependencies"])
-                )
+            _print_install_result(result, dry_run=bool(args.dry_run))
             return 0
         except RoleCatalogError as exc:
             print(f"RoleCatalogError: {exc}", file=sys.stderr)

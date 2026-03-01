@@ -46,12 +46,24 @@ def _default_catalog() -> str:
     return ""
 
 
+def _default_target_registry() -> str:
+    role_registry = os.getenv("SKILLMESH_ROLE_REGISTRY", "").strip()
+    if role_registry:
+        return role_registry
+
+    explicit_registry = os.getenv("SKILLMESH_REGISTRY", "").strip()
+    if explicit_registry:
+        return explicit_registry
+
+    return str((Path.home() / ".codex" / "skills" / "skillmesh" / "installed.registry.yaml"))
+
+
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="skillmesh-roles",
         description="List and install SkillMesh role bundles.",
     )
-    sub = p.add_subparsers(dest="command", required=True)
+    sub = p.add_subparsers(dest="command", required=False)
 
     cmd_list = sub.add_parser("list", help="List available role bundles from catalog")
     cmd_list.add_argument("--catalog", default=_default_catalog())
@@ -67,40 +79,52 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Install role card and missing dependency cards into target registry",
     )
     cmd_install.add_argument("--catalog", default=_default_catalog())
-    cmd_install.add_argument("--registry", required=True)
+    cmd_install.add_argument("--registry", default=_default_target_registry())
     cmd_install.add_argument("--role-id", required=True)
     cmd_install.add_argument("--dry-run", action="store_true")
     cmd_install.add_argument("--json", action="store_true")
+
+    cmd_wizard = sub.add_parser(
+        "wizard",
+        help="Interactive role picker and installer",
+    )
+    cmd_wizard.add_argument("--catalog", default=_default_catalog())
+    cmd_wizard.add_argument("--registry", default=_default_target_registry())
+    cmd_wizard.add_argument("--dry-run", action="store_true")
 
     return p
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = _build_parser().parse_args(argv)
+    arg_list = list(argv) if argv is not None else sys.argv[1:]
+    if not arg_list:
+        arg_list = ["wizard"]
+    args = _build_parser().parse_args(arg_list)
+    command = str(getattr(args, "command", "") or "").strip().lower() or "wizard"
     catalog = str(getattr(args, "catalog", "") or "").strip()
-    if not catalog:
-        print(
-            "Error: Missing catalog path. Pass --catalog or set SKILLMESH_CATALOG.",
-            file=sys.stderr,
-        )
-        return 2
-    catalog_path = Path(catalog).expanduser()
-    if not catalog_path.exists():
-        print(f"Error: Catalog not found: {catalog_path}", file=sys.stderr)
-        return 2
-
-    cmd = ["skillmesh", "roles", args.command, "--catalog", str(catalog_path.resolve())]
-    if args.command == "list":
+    cmd = ["skillmesh", "roles", command]
+    if catalog:
+        catalog_path = Path(catalog).expanduser()
+        if not catalog_path.exists():
+            print(f"Error: Catalog not found: {catalog_path}", file=sys.stderr)
+            return 2
+        cmd.extend(["--catalog", str(catalog_path.resolve())])
+    if command == "list":
         if args.registry:
             cmd.extend(["--registry", args.registry])
         if args.json:
             cmd.append("--json")
-    else:
+    elif command == "install":
         cmd.extend(["--registry", args.registry, "--role-id", args.role_id])
         if args.dry_run:
             cmd.append("--dry-run")
         if args.json:
             cmd.append("--json")
+    else:
+        if args.registry:
+            cmd.extend(["--registry", args.registry])
+        if args.dry_run:
+            cmd.append("--dry-run")
 
     env = os.environ.copy()
     if shutil.which("skillmesh") is None:

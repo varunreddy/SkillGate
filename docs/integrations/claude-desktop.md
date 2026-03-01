@@ -29,6 +29,9 @@ After restart, Claude can call these MCP tools:
 
 - `route_with_skillmesh(query, top_k=5, provider="claude")`
 - `retrieve_skillmesh_cards(query, top_k=5)`
+- `list_skillmesh_roles(catalog=None, registry=None)`
+- `list_installed_skillmesh_roles(catalog=None, registry=None)`
+- `install_skillmesh_role(role, catalog=None, registry=None, dry_run=False)`
 
 ## Option B: Manual install from source
 
