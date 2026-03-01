@@ -42,7 +42,28 @@ Restart Codex after install.
   --top-k 5
 ```
 
-### 3) Use in Claude Code workflow
+### 3) Role commands (optional)
+
+List available roles:
+
+```bash
+skillmesh roles list \
+  --catalog /absolute/path/to/tools.json
+```
+
+Install a selected role plus missing dependency cards into a target registry:
+
+```bash
+skillmesh roles install \
+  --catalog /absolute/path/to/tools.json \
+  --registry /absolute/path/to/my-installed.registry.yaml \
+  --role-id role.devops-engineer
+```
+
+If you prefer skill-bundle wrappers, use:
+`~/.codex/skills/skillmesh/scripts/roles.sh list|install ...`
+
+### 4) Use in Claude Code workflow
 
 - Run the command above.
 - Paste the returned XML block into Claude Code.

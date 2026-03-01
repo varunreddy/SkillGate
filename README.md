@@ -132,6 +132,20 @@ Copy-ready config templates in `examples/mcp/`.
 $skill-installer install https://github.com/varunreddy/SkillMesh/tree/main/skills/skillmesh
 ```
 
+Direct role commands in SkillMesh:
+
+```bash
+skillmesh roles list --catalog /path/to/tools.json
+skillmesh roles install --catalog /path/to/tools.json --registry /path/to/my.registry.yaml --role-id role.data-engineer
+```
+
+Or via installed bundle wrapper:
+
+```bash
+~/.codex/skills/skillmesh/scripts/roles.sh list --catalog /path/to/tools.json
+~/.codex/skills/skillmesh/scripts/roles.sh install --catalog /path/to/tools.json --registry /path/to/my.registry.yaml --role-id role.data-engineer
+```
+
 ## Quickstart
 
 ### Install
@@ -198,6 +212,8 @@ skillmesh emit \
 | `skillmesh retrieve` | Top-K retrieval payload (JSON) |
 | `skillmesh emit` | Provider-formatted context block |
 | `skillmesh index` | Index registry into Chroma for persistent retrieval |
+| `skillmesh roles list` | List available role cards from a catalog |
+| `skillmesh roles install` | Install role card + missing dependency cards into target registry |
 | `skillmesh-mcp` | Stdio MCP server for Claude |
 
 ```bash
